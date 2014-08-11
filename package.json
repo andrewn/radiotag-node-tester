@@ -1,0 +1,15 @@
+{
+  "name": "radiotag-node-test",
+  "version": "0.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "APACHE-2",
+  "dependencies": {
+    "radiotag.js": "git://github.com/radiodan/radiotag.js"
+  }
+}
