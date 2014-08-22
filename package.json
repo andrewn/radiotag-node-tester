@@ -4,12 +4,14 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "start": "node main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "APACHE-2",
   "dependencies": {
     "radiotag.js": "git://github.com/radiodan/radiotag.js"
+  },
+  "devDependencies": {
+    "radiotag.js": "radiodan/radiotag.js#browser-and-node"
   }
 }
