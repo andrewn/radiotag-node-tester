@@ -1,0 +1,15 @@
+#!/usr/bin/env node
+
+var arg = process.argv[2];
+
+switch (arg) {
+  case 'register':  require('../lib/cpa').register();
+                    break;
+  case 'user':      require('../lib/cpa').associateUser();
+                    break;
+  case 'client':    require('../lib/cpa').associateClient();
+                    break;
+  case 'token':     require('../lib/cpa').token();
+                    break;
+  default: console.log('Invalid command: register, user, client, token supported');
+}

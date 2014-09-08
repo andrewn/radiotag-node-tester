@@ -1,4 +1,14 @@
 {
+  "cpa": {
+    "BBC": {
+      "authProvider": "https://radiotag.api.bbci.co.uk/ap/",
+      "clientName": "My CPA device",
+      "clientId": "1ccd7a0a-53bd-4dc5-82e6-84e604bc1748",
+      "clientSecret": "boC7HvV4ph6pcyM4khcMJnx1K5LhVpQSfS337q",
+      "domain": "radiotag.api.bbci.co.uk",
+      "deviceCode": "9dbf8860-a991-4ece-b20d-a2dc136620de"
+    }
+  },
   "radiotag": {
     "BBC": {
       "stationId": "0.c222.ce15.ce1.dab",
