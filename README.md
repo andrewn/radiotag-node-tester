@@ -14,7 +14,7 @@ Configure
 
     cp config.json.example config.json
 
-Add valud access token, server URI and station ID.
+Add valid access token, server URI and station ID.
 
 Use
 --
