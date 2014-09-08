@@ -19,7 +19,7 @@ Add valid access token, server URI and station ID.
 Use
 --
 
-    SERVER=BBC bin/auth
+    SERVER=BBC bin/radiotag auth
 
     stationId 0.c222.ce15.ce1.dab
     accessToken ...

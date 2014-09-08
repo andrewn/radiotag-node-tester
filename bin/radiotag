@@ -1,0 +1,13 @@
+#!/usr/bin/env node
+
+var arg = process.argv[2];
+
+switch (arg) {
+  case 'auth':  require('../lib/radiotag').auth();
+                break;
+  case 'list':  require('../lib/radiotag').list();
+                break;
+  case 'tag':   require('../lib/radiotag').tag();
+                break;
+  default: console.log('Invalid command: auth, list and tag supported');
+}
