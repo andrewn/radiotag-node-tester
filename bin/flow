@@ -1,0 +1,201 @@
+#!/usr/bin/env node
+
+var Promise  = require('es6-promise').Promise,
+    radiotag = require('radiotag.js'),
+    cpa      = require('cpa.js'),
+    config;
+
+try {
+  config = require('../config.json').radiotag;
+} catch (e) {
+  config = {};
+}
+
+var serverName = process.env['SERVER'],
+    server = config[serverName];
+
+if (!server) {
+  console.error('No server', serverName, 'found in config.json');
+  process.exit();
+}
+
+var uri       = server.uri,
+    stationId = server.stationId;
+
+authProvider(stationId, uri)
+  .then(register, errorHandlerForStep('init'))
+  .then(requestUserCode, errorHandlerForStep('register'))
+  .then(askUserToVerifyCode, errorHandlerForStep('requestUserCode'))
+  .then(pollForAccessToken, errorHandlerForStep('askUserToVerifyCode'))
+  .then(tagWithAccessToken, errorHandlerForStep('pollForAccessToken'))
+  .then(displayTag, errorHandlerForStep('tagWithAccessToken'))
+  .then(null, errorHandlerForStep('catch all'));
+
+/*
+  Return an error handler function with msg
+*/
+function errorHandlerForStep(msg) {
+  return function (error) {
+    console.error('Error: ', msg, error);
+  };
+}
+
+/*
+  Get auth provider
+*/
+function authProvider(stationId, uri) {
+  return new Promise(function (resolve, reject) {
+    console.log('Entire flow');
+    console.log('Station id:', stationId);
+    console.log('Base URI:', uri, '\n');
+
+    console.log('\nGet auth provider...');
+    radiotag.getAuthProvider(uri, function (error, authProviderBaseUrl, modes) {
+      if (error) {
+        reject(error);
+      } else {
+        console.log('  authProviderBaseUrl: ', authProviderBaseUrl);
+        console.log('  modes: ', modes);
+        resolve({
+          stationId: stationId,
+          uri: uri,
+          authProviderBaseUrl: authProviderBaseUrl,
+          modes: modes
+        });
+      }
+    });
+  });
+}
+
+/*
+  Register for a clientId and clientSecret
+*/
+function register(params) {
+
+  console.log('\nCPA register');
+  console.log('  authProviderBaseUrl', params.authProviderBaseUrl);
+
+  var domain = radiotag.utils.getDomain(params.uri);
+  params.domain = domain;
+  console.log('  domain', params.domain);
+
+  return new Promise(function (resolve, reject) {
+    cpa.device.registerClient(
+      params.authProviderBaseUrl,
+      'My Device Name',
+      'radiotag-node-test',
+      '0.0.1',
+      function (error, clientId, clientSecret) {
+        if (error) {
+          reject(error);
+        } else {
+          console.log('\nRegistered:');
+          console.log('  clientId %s, clientSecret %s', clientId, clientSecret);
+          params.clientId = clientId;
+          params.clientSecret = clientSecret;
+          resolve(params);
+        }
+      }
+    );
+  });
+}
+
+/*
+  CPA:
+    Get a user code to show to user
+*/
+function requestUserCode(params) {
+  return new Promise(function (resolve, reject) {
+    console.log('\nCPA request user code with ');
+    console.log('  authProvider', params.authProviderBaseUrl);
+    console.log('  clientId', params.clientId);
+    console.log('  clientSecret', params.clientSecret);
+    console.log('  domain', params.domain);
+
+    cpa.device.requestUserCode(
+      params.authProviderBaseUrl,
+      params.clientId,
+      params.clientSecret,
+      params.domain,
+      function (error, data) {
+        if (error) {
+          reject(error);
+        } else {
+          console.log('Got user code');
+          params.user = data;
+          resolve(params);
+        }
+      }
+    );
+  });
+}
+
+function askUserToVerifyCode(params) {
+  console.log('\n\n****\n');
+  console.log('Please visit ' + params.user.verification_uri + ' and enter code: ' + params.user.user_code);
+  console.log('\n****');
+
+  return Promise.resolve(params);
+}
+
+function pollForAccessToken(params) {
+  var pollIntervalInSecs = params.user.interval * 1000;
+
+  return new Promise(function (resolve, reject) {
+    /* Does a single request for access token
+       and resolve, rejects or schedules another request
+    */
+    function accessToken() {
+      process.stdout.write('.');
+
+      cpa.device.requestUserAccessToken(
+        params.authProviderBaseUrl,
+        params.clientId,
+        params.clientSecret,
+        params.user.device_code,
+        params.domain,
+        function tokenDone(error, data) {
+          if (error) {
+            reject(error);
+          } else if (data) {
+            console.log('  access token data: ', data);
+            params.token = data;
+            resolve(params);
+          } else {
+            setTimeout(accessToken, pollIntervalInSecs);
+          }
+        }
+      );
+    }
+
+    accessToken();
+  });
+}
+
+function tagWithAccessToken(params) {
+  return new Promise(function (resolve, reject) {
+    radiotag.tag(
+      params.stationId,
+      params.uri,
+      params.token.access_token,
+      function (error, tag) {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(tag);
+        }
+      }
+    );
+  });
+}
+
+function displayTag(tag) {
+  console.log('\n\n****');
+  console.log('Tagged! 🎉');
+  console.log(tag);
+  console.log('****');
+
+  return Promise.resolve(tag);
+}
+
+
