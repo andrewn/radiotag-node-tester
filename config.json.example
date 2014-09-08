@@ -1,12 +1,14 @@
 {
-  "BBC": {
-    "stationId": "0.c222.ce15.ce1.dab",
-    "accessToken": "lksdjlfkdasjfglkajglskfdjk",
-    "uri": "https://example.api.bbc.co.uk/"
-  },
-  "EBU": {
-    "stationId": "0.c222.ce15.ce1.dab",
-    "accessToken": "lkdsjfklsdjflksjlkdfs",
-    "uri": "http://example.com/"
+  "radiotag": {
+    "BBC": {
+      "stationId": "0.c222.ce15.ce1.dab",
+      "accessToken": "lksdjlfkdasjfglkajglskfdjk",
+      "uri": "https://example.api.bbc.co.uk/"
+    },
+    "EBU": {
+      "stationId": "0.c222.ce15.ce1.dab",
+      "accessToken": "lkdsjfklsdjflksjlkdfs",
+      "uri": "http://example.com/"
+    }
   }
 }
